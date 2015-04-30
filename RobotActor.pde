@@ -24,12 +24,33 @@ Robot robotActor;
 ArrayList<Boundary> boundaries;
 ArrayList<Box> boxes;
 
+PImage ninja;
+PImage head,ninjaBody,leftHand,rightHand,leftLeg,rightLeg;
+
 void setup()
 {
-  size(1200, 400);
+  size(1200, 700);
   smooth();
   background(255);
-  //socket init
+  
+  // load image
+  ninja     = loadImage("res/ninja.png");
+  head      = loadImage("res/ninjaHead.png");
+  ninjaBody      = loadImage("res/ninjaBody.png");
+  leftHand  = loadImage("res/ninjaLeftHand.png");
+  rightHand = loadImage("res/ninjaRightHand.png");
+  leftLeg   = loadImage("res/ninjaLeftLeg.png");
+  rightLeg  = loadImage("res/ninjaRightLeg.png");
+  
+  // resize image
+  head.resize(head.width/3, head.height/3);
+  ninjaBody.resize(ninjaBody.width/3, ninjaBody.height/3);
+  leftHand.resize (leftHand.width/3 , leftHand.height/3);
+  rightHand.resize(rightHand.width/3, rightHand.height/3);
+  leftLeg.resize  (leftLeg.width/3  , leftLeg.height/3);
+  rightLeg.resize (rightLeg.width/3 , rightLeg.height/3);
+  
+  // socket init
   displayMsg = "";
   socket = new WebSocketP5(this,8080);
   
@@ -68,12 +89,14 @@ void draw()
   text("Your Command:", 20, 70);
   textSize(20);
   text(displayMsg, 100, 90);
-  
+  // boundaries
   if (mousePressed) {
-    Box p = new Box(mouseX,mouseY, random(20), random(20), random(PI), false);
+    Box p = new Box(mouseX,mouseY, random(20), random(20), random(PI), 6);
     boxes.add(p);
   }
-  
+  // the ninja 
+  // image( ninja, 400, 180);
+  // Show robot
   robotActor.display();
   // Show the boundaries!
   for (Boundary wall: boundaries) 
@@ -87,7 +110,7 @@ void draw()
      box.display();
    }
   }
-  SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  //SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
   //println(df.format(new Date()));
 }
 
@@ -173,4 +196,3 @@ void websocketOnClosed(WebSocketConnection con)
 {
   println("A client left");
 }
-

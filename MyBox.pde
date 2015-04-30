@@ -1,4 +1,4 @@
-class Box
+class MyBox
 {
   // We need to keep track of a Body and a width and height
   Body body;
@@ -6,14 +6,13 @@ class Box
   float w;
   float h;
   float radius;
-  boolean isBody;
 
   // Constructor
-  Box(float x, float y, float w_, float h_, float angle, boolean b) 
+  MyBox(float x, float y, float w_, float h_, float angle, int t) 
   {
     w = w_;
     h = h_;
-    isBody = b;
+    type = t;
      // Define the shape -- a  (this is what we use for a rectangle)
     PolygonShape sd = new PolygonShape();
     float box2dW = box2d.scalarPixelsToWorld(w/2);
@@ -38,16 +37,17 @@ class Box
     fd.restitution = 0.7;
 
     body.createFixture(fd);
-
-    // Give it some initial random velocity
-    //body.setLinearVelocity(new Vec2(random(-5,5),random(2,5)));
-    //body.setAngularVelocity(random(-5,5));
   }
 
   // This function removes the particle from the box2d world
   void killBody() 
   {
     box2d.destroyBody(body);
+  }
+  
+  Body getBody()
+  {
+    return body;
   }
 
   // Drawing the box
@@ -62,17 +62,49 @@ class Box
     pushMatrix();
       translate(pos.x,pos.y);
       rotate(-a);
-      fill(#ede8d9);
-      noStroke();
-      // stroke(#ecdaa2);
-      rect(0,0,w,h);
-      if(isBody)
+      
+      switch(type)
       {
-        fill(255);
-        noStroke();
-        // stroke(#ecdaa2);
-        rect(0, h/4, 6, h/2);
+        case 0://body
+          image(ninjaBody, -ninjaBody.width/2.0, -ninjaBody.height/2.0);
+          // rect(0, h/4, 6, h/2);
+          break;
+          
+        case 1://leftHand
+          // fill(#F3C149);
+          // noStroke();
+          image(leftHand, -leftHand.width/2.0, -leftHand.height/2.0);
+          break;
+          
+        case 2://rightHand
+          image(rightHand, -rightHand.width/2.0, -rightHand.height/2.0);
+          break;
+          
+        case 3://leftLeg
+          image(leftLeg, -leftLeg.width/2.0, -leftLeg.height/2.0);
+          break;
+          
+        case 4://rightLeg
+          image(rightLeg, -rightLeg.width/2.0, -rightLeg.height/2.0);
+          break;
+          
+        case 5://underpan
+          fill(#ede8d9);
+          noStroke();
+          rect(0 ,0 ,w , h);
+          image(leftLeg, rightLeg.width/2.0, -leftLeg.height);
+          image(rightLeg, - 3 * rightLeg.width/2.0, -rightLeg.height);
+          break;
+          
+        case 6://else
+          fill(#ede8d9);
+          noStroke();
+          rect(0 ,0 ,w , h);
+          break;
       }
+      // draw shape
+      // fill(#ede8d9);
+      // rect(0.0, 0.0, w, h);
     popMatrix();
   }
 }
