@@ -65,27 +65,32 @@ class MyCircle
         fill(#F3C149);
         noStroke();
         // stroke(#eac774);
-        ellipse(0,0, radius, radius);//draw circle
+        if(debug)
+          ellipse(0,0, radius, radius);//draw circle
         // draw wheel shaft
         noStroke();
         fill(0);
-        rect(0.0, 0.0, radius/20, radius - 2);
+        if(debug)
+          rect(0.0, 0.0, radius/20, radius - 2);
       }
       else if(!isWheel)
       {
         noStroke();
         fill(#fff8b5);
         
-        ellipse(   radius/6.0, 0.0, radius/15.0, radius/6.0);
-        ellipse( - radius/6.0, 0.0, radius/15.0, radius/6.0);
-        
+        if(debug)
+        {
+          ellipse(   radius/6.0, 0.0, radius/15.0, radius/6.0);
+          ellipse( - radius/6.0, 0.0, radius/15.0, radius/6.0);
+        }
         image( head, -head.width/2.0, -head.height/2.0);
       }
       
-      // fill(#F3C149);
-      // noStroke();
-      // // stroke(#eac774);
-      // ellipse(0,0, radius, radius);//draw circle
+      fill(#F3C149);
+      noStroke();
+      // stroke(#eac774);
+      if(debug)
+        ellipse(0,0, radius, radius);//draw circle
     popMatrix();
   }
 }

@@ -22,10 +22,12 @@ float gra = -9.80;
 Robot robotActor;
 // A list we'll use to track fixed objects
 ArrayList<Boundary> boundaries;
-ArrayList<Box> boxes;
+ArrayList<MyBox> boxes;
 
 PImage ninja;
 PImage head,ninjaBody,leftHand,rightHand,leftLeg,rightLeg;
+
+boolean debug = false;
 
 void setup()
 {
@@ -36,9 +38,9 @@ void setup()
   // load image
   ninja     = loadImage("res/ninja.png");
   head      = loadImage("res/ninjaHead.png");
-  ninjaBody      = loadImage("res/ninjaBody.png");
-  leftHand  = loadImage("res/ninjaLeftHand.png");
-  rightHand = loadImage("res/ninjaRightHand.png");
+  ninjaBody = loadImage("res/ninjaBody.png");
+  leftHand  = loadImage("res/ninjaHand.png");
+  rightHand = loadImage("res/ninjaHand.png");
   leftLeg   = loadImage("res/ninjaLeftLeg.png");
   rightLeg  = loadImage("res/ninjaRightLeg.png");
   
@@ -61,7 +63,7 @@ void setup()
   box2d.createWorld(gravity);
   
   // init boxes
-  boxes = new ArrayList<Box>();
+  boxes = new ArrayList<MyBox>();
   // Add some boundaries
   boundaries = new ArrayList<Boundary>();
   //Boundary(x,y,width,height)
@@ -70,7 +72,7 @@ void setup()
   boundaries.add(new Boundary(   width, height   /2,     0,  height));
   boundaries.add(new Boundary(       0, height   /2,     0,  height));
   //creat a robot
-  robotActor = new Robot(width/2, height - 60);
+  robotActor = new Robot(width/2, height - 50);
 }
 
 void draw()
@@ -91,11 +93,12 @@ void draw()
   text(displayMsg, 100, 90);
   // boundaries
   if (mousePressed) {
-    Box p = new Box(mouseX,mouseY, random(20), random(20), random(PI), 6);
+    MyBox p = new MyBox(mouseX,mouseY, random(20), random(20), random(PI), 6);
     boxes.add(p);
   }
-  // the ninja 
-  // image( ninja, 400, 180);
+  // the ninja
+  if(debug)
+    image( ninja, 400, 180);
   // Show robot
   robotActor.display();
   // Show the boundaries!
@@ -105,7 +108,7 @@ void draw()
   }
   if(boxes.size() != 0)
   {
-   for (Box box: boxes)
+   for (MyBox box: boxes)
    {
      box.display();
    }

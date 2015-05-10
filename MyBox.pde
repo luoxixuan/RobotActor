@@ -67,7 +67,8 @@ class MyBox
       {
         case 0://body
           image(ninjaBody, -ninjaBody.width/2.0, -ninjaBody.height/2.0);
-          // rect(0, h/4, 6, h/2);
+          if(debug)
+            rect(0, h/4, 6, h/2);
           break;
           
         case 1://leftHand
@@ -91,9 +92,10 @@ class MyBox
         case 5://underpan
           fill(#ede8d9);
           noStroke();
-          rect(0 ,0 ,w , h);
-          image(leftLeg, rightLeg.width/2.0, -leftLeg.height);
-          image(rightLeg, - 3 * rightLeg.width/2.0, -rightLeg.height);
+          if(debug)
+            rect(0 ,0 ,w , h);
+          image(leftLeg, rightLeg.width/2.0,       -8.0);
+          image(leftLeg, - 3 * rightLeg.width/2.0, -8.0);
           break;
           
         case 6://else
@@ -103,8 +105,9 @@ class MyBox
           break;
       }
       // draw shape
-      // fill(#ede8d9);
-      // rect(0.0, 0.0, w, h);
+      fill(#ede8d9);
+      if(debug)
+        rect(0.0, 0.0, w, h);
     popMatrix();
   }
 }

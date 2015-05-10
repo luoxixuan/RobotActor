@@ -11,6 +11,23 @@ class MyJoint
     case 0:
       addPrimaticJoint(b1, b2, v);
       break;
+    case 1:
+      addWeldJoint(b1, b2, v);
+      break;
+    
+    case 2:
+      addPrimaticJoint(b1, b2, v);
+      break;
+    
+    case 3:
+      addPrimaticJoint(b1, b2, v);
+      break;
+    
+    case 4:
+      addPrimaticJoint(b1, b2, v);
+      break;
+    
+    
     }
     
   }

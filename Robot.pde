@@ -13,7 +13,8 @@ class Robot
   PrismaticJoint headJoint; 
   
   float panLen = 145;
-  float bodyHight = 100;
+  // Vec2 hand = new Vec2(20, 20);
+  float bodyHight = 70;
   float wheelRadius = 25;
   float speed = 5.0;
   
@@ -28,11 +29,11 @@ class Robot
   Robot(float x, float y) 
   {
     // Initialize body
-    robotHead = new MyCircle(x, y - bodyHight - bodyHight/8.0 - 3, bodyHight/4.0, false);
-    robotBody = new MyBox(x, y - bodyHight/2 - 3, bodyHight/2, bodyHight, 0, 0);
+    robotHead = new MyCircle(x, y - bodyHight - bodyHight/8.0 - 3, 84, false);
+    robotBody = new MyBox(x, y - 30, 75, bodyHight, 0, 0);
   
-    handL = new MyBox(x - (bodyHight/4 + 16), y - bodyHight/2 - 10, bodyHight/2, 10, 0.0, 1);
-    handR = new MyBox(x + (bodyHight/4 + 16), y - bodyHight/2 - 10, bodyHight/2, 10, 0.0, 2);
+    handL = new MyBox(x - (25 + 16), y - 40, bodyHight/2, 20, -40, 1);
+    handR = new MyBox(x + (25 + 16), y - 40, bodyHight/2, 20, 40, 2);
     
     underPan = new MyBox(x, y, panLen, 10.0, 0, 5);
     wheelR = new MyCircle(x + panLen/4, y + wheelRadius/2 + 10, wheelRadius, true);
