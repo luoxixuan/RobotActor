@@ -1,23 +1,21 @@
+int primaticType = 0;
+int WeldType     = 1;
+int wheelType    = 2;
+int handLType    = 3; 
+int handRType    = 4; 
+
 class Robot 
 {
-  // Our object is two boxes and one joint
-  // Consider making the fixed box much smaller 
-  //and not drawing it
-  WheelJoint wheelJointL;
-  WheelJoint wheelJointR;
-  
-  WeldJoint handJointR;
-  WeldJoint handJointL;
-  
-  PrismaticJoint bodyJoint;
-  PrismaticJoint headJoint; 
-  
+  // position
+  float x;
+  float y;
+  // body size 
   float panLen = 145;
-  // Vec2 hand = new Vec2(20, 20);
   float bodyHight = 70;
   float wheelRadius = 25;
   float speed = 5.0;
   
+  // body
   MyBox underPan;
   MyBox robotBody;
   MyBox handR;
@@ -26,120 +24,101 @@ class Robot
   MyCircle wheelL;
   MyCircle wheelR;
   
-  Robot(float x, float y) 
+  //joint
+  WheelJoint wheelJointL;   // wheel and underpan
+  WheelJoint wheelJointR;
+  RevoluteJoint handJointR; // hand and body
+  RevoluteJoint handJointL;
+  PrismaticJoint bodyJoint; // body and underpan
+  PrismaticJoint headJoint; // head and body
+  
+  Robot(float xt, float yt) 
   {
     // Initialize body
-    robotHead = new MyCircle(x, y - bodyHight - bodyHight/8.0 - 3, 84, false);
+    x = xt;
+    y = yt;
+    // add body widget
+    addBody();
+    addHead();
+    addHand();
+    addWheel();
+  }
+  // add joint
+  void addHead()
+  {
+    // create head
+    robotHead = new MyCircle(x, y - bodyHight - bodyHight/3.0, 84, false);
+    // Create the joint
+    MyJoint j = new MyJoint(primaticType ,robotBody.getBody(), robotHead.getBody(), new Vec2(0.0, 1.0));
+    headJoint = (PrismaticJoint) j.getJoint();
+  }
+
+  void addBody()
+  {
+    // create body&underpan
     robotBody = new MyBox(x, y - 30, 75, bodyHight, 0, 0);
+    underPan = new MyBox(x, y, panLen, 10.0, 0, 3);
+    // create joint between body&uderpan
+    MyJoint j = new MyJoint( primaticType, underPan.getBody(), robotBody.getBody(), new Vec2(0.0, 1.0));
+    bodyJoint = (PrismaticJoint)j.getJoint();
+  }
   
-    handL = new MyBox(x - (25 + 16), y - 40, bodyHight/2, 20, -40, 1);
-    handR = new MyBox(x + (25 + 16), y - 40, bodyHight/2, 20, 40, 2);
+  void addHand()
+  {
+    // create hand
+    handL = new MyBox(x - 55, y - 30, bodyHight/2, 10, -40, 1);
+    handR = new MyBox(x + 55, y - 30, bodyHight/2, 10,  40, 1);
     
-    underPan = new MyBox(x, y, panLen, 10.0, 0, 5);
+    // create joint hand&body
+    // left joint
+    MyJoint j  = new MyJoint(handLType, robotBody.getBody(), handL.getBody(), handL.getBody().getWorldPoint(new Vec2(-2, 0)));
+    handJointL = (RevoluteJoint) j.getJoint();
+    // right joint
+    j  = new MyJoint(handRType, robotBody.getBody(), handR.getBody(), handR.getBody().getWorldPoint(new Vec2(2, 0)));
+    handJointR = (RevoluteJoint) j.getJoint(); //<>//
+  }
+  
+  void addWheel()
+  {
+    // create wheel
     wheelR = new MyCircle(x + panLen/4, y + wheelRadius/2 + 10, wheelRadius, true);
     wheelL = new MyCircle(x - panLen/4, y + wheelRadius/2 + 10, wheelRadius, true);
-    //add joint
-    addBodyJoint();
-    addHeadJoint();
-    addHandJoint();
-    addWheelJoint();
+    
+    // left wheel joint
+    MyJoint j = new MyJoint( wheelType, underPan.getBody(), wheelL.getBody(), new Vec2(0.0, 1.0));
+    wheelJointL = (WheelJoint) j.getJoint();
+    // right  wheel joint
+    j = new MyJoint( wheelType, underPan.getBody(), wheelR.getBody(), new Vec2(0.0, 1.0));
+    wheelJointR = (WheelJoint) j.getJoint();
   }
-
-  void addHeadJoint()
+  // action
+  void waveRightHand(boolean motorOn)
   {
-    // Define joint as between two bodies
-    PrismaticJointDef headJointDef = new PrismaticJointDef();
-    
-    headJointDef.initialize(robotBody.getBody(), robotHead.getBody(), robotBody.getBody().getWorldCenter(), new Vec2(0.0, 1.0));
-    
-    // There are many other properties you can set for a Wheel joint
-    // For example, you can limit its angle between a minimum and a maximum
-    // See box2d manual for more
-    headJointDef.lowerTranslation = 0.0;
-    headJointDef.upperTranslation = 1.0;
-    headJointDef.enableLimit = true;
-    // Turning on a motor (optional)
-    headJointDef.motorSpeed = 0.0;;       // how fast?
-    headJointDef.maxMotorForce = 10.0; // how powerful?
-    headJointDef.enableMotor = true;      // is it on?
-   
-    // Create the joint
-    headJoint = (PrismaticJoint) box2d.world.createJoint(headJointDef);
+    if(motorOn)
+    {
+      if(handJointR.getMotorSpeed() == 2)
+        handJointR.setMotorSpeed(-2);
+      else
+        handJointR.setMotorSpeed(2);
+    }
+    else
+      handJointR.setMotorSpeed(0);
   }
-
-  void addBodyJoint()
+  void waveLeftHand(boolean motorOn)
   {
-    MyJoint bodyJ = new MyJoint( 0, underPan.getBody(), robotBody.getBody(), new Vec2(0.0, 1.0));
-    bodyJoint = (PrismaticJoint)bodyJ.getJoint();
-    // Define joint as between two bodies
-    // PrismaticJointDef bodyJointDef = new PrismaticJointDef();
-    
-    // bodyJointDef.initialize(underPan.body, robotBody.body, underPan.body.getWorldCenter(), new Vec2(0.0, 1.0));
-    
-    
-    // // There are many other properties you can set for a Wheel joint
-    // // For example, you can limit its angle between a minimum and a maximum
-    // // See box2d manual for more
-    // bodyJointDef.lowerTranslation = 0.0;
-    // bodyJointDef.upperTranslation = 1.0;
-    // bodyJointDef.enableLimit = true;
-    // // Turning on a motor (optional)
-    // bodyJointDef.motorSpeed = 0.0;;       // how fast?
-    // bodyJointDef.maxMotorForce = 10.0; // how powerful?
-    // bodyJointDef.enableMotor = true;      // is it on?
-    
-    // Create the joint
-    // bodyJoint = (PrismaticJoint) box2d.world.createJoint(bodyJointDef);
+    if(motorOn)
+    {
+      if(handJointL.getMotorSpeed() == 2)
+        handJointL.setMotorSpeed(-2);
+      else
+        handJointL.setMotorSpeed(2);
+    }
+    else
+      handJointL.setMotorSpeed(0);
   }
   
-  void addHandJoint()
-  {
-    WeldJointDef handJointLDef = new WeldJointDef();
-    WeldJointDef handJointRDef = new WeldJointDef();
-    
-    Vec2 handJointPos;
-    handJointPos = robotBody.getBody().getWorldCenter();
-    handJointLDef.initialize(robotBody.getBody(), handL.getBody(), handJointPos.add(new Vec2( bodyHight/4, -bodyHight/2)));
-    handJointRDef.initialize(robotBody.getBody(), handR.getBody(), handJointPos.add(new Vec2(-bodyHight/4, -bodyHight/2)));
-    
-    handJointL = (WeldJoint) box2d.world.createJoint( handJointLDef);
-    handJointR = (WeldJoint) box2d.world.createJoint( handJointRDef);
-  }
-  
-  void addWheelJoint()
-  {
-    WheelJointDef wheelJLDef = new WheelJointDef();
-    WheelJointDef wheelJRDef = new WheelJointDef();
-    
-    wheelJLDef.initialize(underPan.getBody(), wheelL.getBody(), wheelL.getBody().getWorldCenter(), new Vec2(0.0, 1.0));
-    wheelJRDef.initialize(underPan.getBody(), wheelR.getBody(), wheelR.getBody().getWorldCenter(), new Vec2(0.0, 1.0));
-    
-    wheelJLDef.motorSpeed = PI * speed * 0;       // how fast?
-    wheelJLDef.maxMotorTorque = 14000.0; // how powerful?
-    wheelJLDef.enableMotor = true;      // is it on?
-    wheelJLDef.collideConnected = true;
-    wheelJLDef.frequencyHz = 2.0f;
-    wheelJLDef.dampingRatio = 0.1f;
-    
-    wheelJRDef.motorSpeed = PI * speed * 0;
-    wheelJRDef.maxMotorTorque = 14000.0;
-    wheelJRDef.enableMotor = true;
-    wheelJRDef.collideConnected = true;
-    wheelJRDef.frequencyHz = 2.0f;
-    wheelJRDef.dampingRatio = 0.1f;
-
-    
-    wheelJointL = (WheelJoint) box2d.world.createJoint(wheelJLDef);
-    wheelJointR = (WheelJoint) box2d.world.createJoint(wheelJRDef);
-  }
-
-  // Turn the motor on or off
-  void toggleMotor() 
-  {
-    wheelJointL.enableMotor(!wheelJointL.isMotorEnabled());
-    wheelJointR.enableMotor(!wheelJointR.isMotorEnabled());
-  }
-
+  // foot
+  // set move direction
   void setMotor(float d)
   {
     //turn left
@@ -165,9 +144,8 @@ class Robot
       wheelJointL.setMotorSpeed(0);
     }
     //stop
-    else if(d == 0.0)
+    else
     {
-      
       if(wheelJointR.isMotorEnabled())
       {
         wheelJointR.enableMotor(false);
@@ -182,22 +160,27 @@ class Robot
       }
     }
   }
-
+  // Turn the motor on or off
+  void toggleMotor() 
+  {
+    wheelJointL.enableMotor(!wheelJointL.isMotorEnabled());
+    wheelJointR.enableMotor(!wheelJointR.isMotorEnabled());
+  }
   boolean motorOn() 
   {
     return wheelJointL.isMotorEnabled();
   }
 
-void killBody()
-{
-  robotHead.killBody();
-  robotBody.killBody();
-  handL.killBody();
-  handR.killBody();
-  underPan.killBody();
-  wheelL.killBody();
-  wheelR.killBody();
-}
+  void killBody()
+  {
+    robotHead.killBody();
+    robotBody.killBody();
+    handL.killBody();
+    handR.killBody();
+    underPan.killBody();
+    wheelL.killBody();
+    wheelR.killBody();
+  }
 
   void display() 
   {
@@ -205,10 +188,11 @@ void killBody()
     handR.display();
     
     robotBody.display();
-    
     underPan.display();
+    
     wheelL.display();
     wheelR.display();
+    
     robotHead.display();
   }
 }

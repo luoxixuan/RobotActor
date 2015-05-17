@@ -1,3 +1,5 @@
+enum displayMode{hand, leg, underpan, boxes}
+
 class MyBox
 {
   // We need to keep track of a Body and a width and height
@@ -71,34 +73,29 @@ class MyBox
             rect(0, h/4, 6, h/2);
           break;
           
-        case 1://leftHand
+        case 1://Hand
           // fill(#F3C149);
           // noStroke();
-          image(leftHand, -leftHand.width/2.0, -leftHand.height/2.0);
+          image(handImg, -handImg.width/2.0 - 12, -handImg.height/2.0);
+          image(handImg,  handImg.width/2.0 - 12, -handImg.height/2.0);
           break;
           
-        case 2://rightHand
-          image(rightHand, -rightHand.width/2.0, -rightHand.height/2.0);
+        case 2://Leg
+          image(legImg, -legImg.width/2.0, -legImg.height/2.0);
           break;
           
-        case 3://leftLeg
-          image(leftLeg, -leftLeg.width/2.0, -leftLeg.height/2.0);
-          break;
-          
-        case 4://rightLeg
-          image(rightLeg, -rightLeg.width/2.0, -rightLeg.height/2.0);
-          break;
-          
-        case 5://underpan
+        case 3://underpan
           fill(#ede8d9);
           noStroke();
           if(debug)
             rect(0 ,0 ,w , h);
-          image(leftLeg, rightLeg.width/2.0,       -8.0);
-          image(leftLeg, - 3 * rightLeg.width/2.0, -8.0);
+          image(legImg, legImg.width/2.0,       -8.0);
+          image(legImg, legImg.width/2.0,       -8.0 + legImg.height);
+          image(legImg, - 3 * legImg.width/2.0, -8.0);
+          image(legImg, - 3 * legImg.width/2.0, -8.0 + legImg.height); //<>//
           break;
           
-        case 6://else
+        case 4://else
           fill(#ede8d9);
           noStroke();
           rect(0 ,0 ,w , h);

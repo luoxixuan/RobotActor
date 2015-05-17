@@ -1,8 +1,6 @@
 class MyJoint
 {
-  // RevoluteJoint jointL;
   Joint j;
-  // RevoluteJointDef wheelJLDef;
   
   MyJoint(int t,Body b1, Body b2, Vec2 v)
   {
@@ -16,20 +14,18 @@ class MyJoint
       break;
     
     case 2:
-      addPrimaticJoint(b1, b2, v);
+      addWheelJoint(b1, b2, v);
       break;
     
     case 3:
-      addPrimaticJoint(b1, b2, v);
+      addHandL(b1, b2, v);
       break;
     
     case 4:
-      addPrimaticJoint(b1, b2, v);
+      addHandR(b1, b2, v);
       break;
-    
-    
-    }
-    
+ 
+    }   
   }
   
   void display()
@@ -42,6 +38,16 @@ class MyJoint
     return j;
   }
   
+  void addHandL(Body b1, Body b2, Vec2 v)
+  {
+    addRevoluteJoint(b1, b2, v, 0.22, -0.50);
+  }
+  
+  void addHandR(Body b1, Body b2, Vec2 v)
+  {
+    addRevoluteJoint(b1, b2, v, 0.50, -0.22);
+  }
+  
   void addPrimaticJoint(Body b1, Body b2, Vec2 v)
   {
     // Define joint as between two bodies
@@ -49,10 +55,6 @@ class MyJoint
     
     bodyJointDef.initialize(b1, b2, b1.getWorldCenter(), v);
     
-    
-    // There are many other properties you can set for a Wheel joint
-    // For example, you can limit its angle between a minimum and a maximum
-    // See box2d manual for more
     bodyJointDef.lowerTranslation = 0.0;
     bodyJointDef.upperTranslation = 1.0;
     bodyJointDef.enableLimit = true;
@@ -74,5 +76,36 @@ class MyJoint
     handJDef.initialize(b2, b1, handJointPos.add(v));
   
     j = box2d.world.createJoint( handJDef);
+  }
+  
+  void addWheelJoint(Body b1, Body b2, Vec2 v)
+  {
+    WheelJointDef WheelJoint = new WheelJointDef();
+    WheelJoint.initialize(b1, b2, b2.getWorldCenter(), new Vec2(0.0, 1.0));
+    
+    // There are many other properties you can set for a Wheel joint
+    // For example, you can limit its angle between a minimum and a maximum
+    // See box2d manual for more
+    WheelJoint.motorSpeed = 0;       // how fast?
+    WheelJoint.maxMotorTorque = 14000.0; // how powerful?
+    WheelJoint.enableMotor = true;      // is it on?
+    WheelJoint.collideConnected = true;
+    WheelJoint.frequencyHz = 2.0f;
+    WheelJoint.dampingRatio = 0.1f;
+    
+    j = (WheelJoint) box2d.world.createJoint(WheelJoint);
+  }
+  
+  void addRevoluteJoint(Body b1, Body b2, Vec2 v, float limitUp, float limitDown)
+  {
+    RevoluteJointDef RevoluteJoint = new RevoluteJointDef();
+    RevoluteJoint.initialize(b1, b2, v);
+    RevoluteJoint.lowerAngle = limitDown * PI; // -135 degrees
+    RevoluteJoint.upperAngle = limitUp * PI; // 45 degrees
+    RevoluteJoint.enableLimit = true;
+    RevoluteJoint.maxMotorTorque = 10000.0f;
+    RevoluteJoint.motorSpeed = 0.0f;
+    RevoluteJoint.enableMotor = true;
+    j = (RevoluteJoint) box2d.world.createJoint(RevoluteJoint);
   }
 }
