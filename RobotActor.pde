@@ -9,25 +9,40 @@ import org.jbox2d.dynamics.contacts.*;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.lang.Thread;
+import java.lang.Runnable;
 
 import muthesius.net.*;
 import org.webbitserver.*;
 
 // debug
-boolean debug = false;
+boolean debug = true;
+
+// enum
+enum MoveDir{left, right};
 
 // websocket
 WebSocketP5 socket;
 String displayMsg;
+
 // box2d
 Box2DProcessing box2d;
 float gra = -9.80;
-// ninjarobot
+
+// ninja robot
 Robot ninja;
-// A list we'll use to track fixed objects
+Robot ragdoll;
+// steps
+int stepNum   = 20;
+// wave times
+int waveTimes = 10;
+
+// lists we'll use to track fixed objects
 ArrayList<Boundary> boundaries;
 ArrayList<MyBox> boxes;
+ArrayList<MyCircle> balls;
 
+// image res
 PImage ninjaImg;
 PImage head,ninjaBody,handImg,rightHand,legImg,rightLeg;
 void setup()
@@ -38,11 +53,11 @@ void setup()
   
   // image resource
   // load image
-  ninjaImg     = loadImage("res/ninja.png");
+  ninjaImg  = loadImage("res/ninja.png");
   head      = loadImage("res/ninjaHead.png");
   ninjaBody = loadImage("res/ninjaBody.png");
-  handImg  = loadImage("res/ninjaHandS.png");
-  legImg   = loadImage("res/ninjaLegS.png");
+  handImg   = loadImage("res/ninjaHandS.png");
+  legImg    = loadImage("res/ninjaLegS.png");
   // resize image
   head.resize((int)(head.width/3.2), (int)(head.height/3.2));
   legImg.resize((int)(legImg.width/3), (int)(legImg.height/4));
@@ -61,6 +76,7 @@ void setup()
   
   // boxes array init //<>//
   boxes = new ArrayList<MyBox>();
+  balls = new ArrayList<MyCircle>();
   
   // Add some boundaries
   boundaries = new ArrayList<Boundary>();
@@ -71,7 +87,8 @@ void setup()
   boundaries.add(new Boundary(       0, height   /2,     0,  height));
   
   //creat a robot
-  ninja = new Robot(width/2, height - 50);
+  ninja = new Robot(width/2, height - 100);
+  ragdoll = new Robot(width/3, height - 100);
 }
 
 void draw()
@@ -100,11 +117,18 @@ void draw()
     MyBox p = new MyBox(mouseX,mouseY, random(20), random(20), random(PI), 4);
     boxes.add(p);
   }
+  else if (mousePressed && (mouseButton == LEFT)) 
+  {
+    MyCircle p = new MyCircle(mouseX, mouseY, 10, 2);
+    balls.add(p);
+  }
   
   // show the ninja
+  noStroke();
   if(debug)
     image( ninjaImg, 400, 180);
   ninja.display();// Show robotninja
+  ragdoll.display();
   // show the boundaries!
   for (Boundary wall: boundaries) 
   {
@@ -117,6 +141,14 @@ void draw()
    {
      box.display();
    }
+  }
+  // show balls
+  if(balls.size() != 0)
+  {
+    for (MyCircle ball: balls)
+    {
+      ball.display();
+    }
   }
 }
 
@@ -132,6 +164,7 @@ void mouseMoved()
 
 void keyPressed()
 {
+  // wave hand
   if (keyCode == LEFT) 
   {
     ninja.waveLeftHand(true);
@@ -142,27 +175,40 @@ void keyPressed()
   }
   if (keyCode == DOWN)
   {
-    ninja.waveRightHand(false);
-    ninja.waveLeftHand(false);
+    ninja.waveRightHand(waveTimes);
+    ninja.waveLeftHand(waveTimes);
   }
+  if (keyCode == SHIFT)
+  {
+    ninja.waveLeftHand(-20.0);
+    ninja.waveRightHand(20.0);
+  }
+  // kick
+  if (keyCode == 'K' || keyCode == 'k')
+  {
+    ninja.kickR();
+  }
+  
+  // move
   if (key == 'A' || key == 'a') 
   {
-    ninja.setMotor(-1.0);
+    ninja.moveL(stepNum);
   }
   if (key == 'D' || key == 'd') 
   {
-    ninja.setMotor(1.0);
+    ninja.moveR(stepNum);
   }
   if (key == 'S' || key == 's')
   {
-    ninja.setMotor(0.0);
+    // ninja.liftLeftFoot(false);
+    // ninja.liftRightFoot(false);
   }
   if (key == 'R' || key == 'r')
   {
     setup();
   }
 }
-
+/*
 void wordCommand()
 {
   if(displayMsg.indexOf("le")>=0 || displayMsg.indexOf("ft")>=0)
@@ -194,7 +240,7 @@ void wordCommand()
    ninja.setMotor(0.0);
  }
 }
-
+*/
 //websocket
 void websocketOnMessage(WebSocketConnection con, String msg)
 {
@@ -202,7 +248,7 @@ void websocketOnMessage(WebSocketConnection con, String msg)
   displayMsg = msg;
   
   //commander
-  wordCommand();
+  // wordCommand();
 }
 
 void websocketOnOpen(WebSocketConnection con)

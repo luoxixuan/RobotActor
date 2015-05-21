@@ -20,7 +20,7 @@ class MyBox
     float box2dW = box2d.scalarPixelsToWorld(w/2);
     float box2dH = box2d.scalarPixelsToWorld(h/2);
     sd.setAsBox(box2dW, box2dH);
-    sd.m_radius = 0.1;
+    sd.m_radius = 0.001;
     
     // Define and create the body
     BodyDef bd = new BodyDef();
@@ -68,43 +68,42 @@ class MyBox
       switch(type)
       {
         case 0://body
-          image(ninjaBody, -ninjaBody.width/2.0, -ninjaBody.height/2.0);
-          if(debug)
-            rect(0, h/4, 6, h/2);
+          if(!debug)
+            image(ninjaBody, -ninjaBody.width/2.0, -ninjaBody.height/2.0);
           break;
           
         case 1://Hand
-          // fill(#F3C149);
-          // noStroke();
-          image(handImg, -handImg.width/2.0 - 12, -handImg.height/2.0);
-          image(handImg,  handImg.width/2.0 - 12, -handImg.height/2.0);
+          if(!debug)
+          {
+            image(handImg, -handImg.width/2.0 - 12, -handImg.height/2.0);
+            image(handImg,  handImg.width/2.0 - 12, -handImg.height/2.0);
+          }
           break;
           
         case 2://Leg
-          image(legImg, -legImg.width/2.0, -legImg.height/2.0);
+          if(!debug)
+          {
+            image(legImg, -legImg.width/2.0, 8.0 -legImg.height * 2);
+            image(legImg, -legImg.width/2.0, 8.0 -legImg.height);
+          }
           break;
           
         case 3://underpan
           fill(#ede8d9);
           noStroke();
-          if(debug)
-            rect(0 ,0 ,w , h);
-          image(legImg, legImg.width/2.0,       -8.0);
-          image(legImg, legImg.width/2.0,       -8.0 + legImg.height);
-          image(legImg, - 3 * legImg.width/2.0, -8.0);
-          image(legImg, - 3 * legImg.width/2.0, -8.0 + legImg.height); //<>//
+           //<>//
           break;
           
         case 4://else
           fill(#ede8d9);
           noStroke();
-          rect(0 ,0 ,w , h);
+          rect(0 ,0 ,w , h, w/7);
           break;
       }
       // draw shape
       fill(#ede8d9);
       if(debug)
-        rect(0.0, 0.0, w, h);
+        rect(0.0, 0.0, w, h, w/7);
     popMatrix();
   }
 }

@@ -1,8 +1,12 @@
 int primaticType = 0;
 int WeldType     = 1;
 int wheelType    = 2;
-int handLType    = 3; 
-int handRType    = 4; 
+int handLType    = 3;
+int handRType    = 4;
+int legLType     = 5;
+int legRType     = 6;
+int footLType    = 7;
+int footRType    = 8;
 
 class Robot 
 {
@@ -10,23 +14,29 @@ class Robot
   float x;
   float y;
   // body size 
-  float panLen = 145;
-  float bodyHight = 70;
-  float wheelRadius = 25;
-  float speed = 5.0;
+  float bodyHeight  = 70;
+  float speed       = 2.0;
+  float kickSpeed   = 50;
+  float waveSpeed   = 2;
+  float stepT       = 2;
   
   // body
-  MyBox underPan;
   MyBox robotBody;
   MyBox handR;
   MyBox handL;
+  MyBox legL;
+  MyBox legR;
+  MyBox footL;
+  MyBox footR;
   MyCircle robotHead;
-  MyCircle wheelL;
-  MyCircle wheelR;
   
   //joint
-  WheelJoint wheelJointL;   // wheel and underpan
-  WheelJoint wheelJointR;
+  // WheelJoint wheelJointL;   // wheel and underpan
+  // WheelJoint wheelJointR;
+  RevoluteJoint legJointR;  // leg and body
+  RevoluteJoint legJointL;
+  RevoluteJoint footJointR;  // foot and leg
+  RevoluteJoint footJointL;
   RevoluteJoint handJointR; // hand and body
   RevoluteJoint handJointL;
   PrismaticJoint bodyJoint; // body and underpan
@@ -41,13 +51,17 @@ class Robot
     addBody();
     addHead();
     addHand();
-    addWheel();
+    addLeg();
+    // reset foot to suitable status
+    resetFoot();
+    // addFoot();
+    // addWheel();
   }
   // add joint
   void addHead()
   {
     // create head
-    robotHead = new MyCircle(x, y - bodyHight - bodyHight/3.0, 84, false);
+    robotHead = new MyCircle(x, y - bodyHeight - bodyHeight/3.0, 84, 1);
     // Create the joint
     MyJoint j = new MyJoint(primaticType ,robotBody.getBody(), robotHead.getBody(), new Vec2(0.0, 1.0));
     headJoint = (PrismaticJoint) j.getJoint();
@@ -56,18 +70,18 @@ class Robot
   void addBody()
   {
     // create body&underpan
-    robotBody = new MyBox(x, y - 30, 75, bodyHight, 0, 0);
-    underPan = new MyBox(x, y, panLen, 10.0, 0, 3);
+    robotBody = new MyBox(x, y - 30, 75, bodyHeight, 0, 0);
+    // underPan = new MyBox(x, y, panLen, 10.0, 0, 3);
     // create joint between body&uderpan
-    MyJoint j = new MyJoint( primaticType, underPan.getBody(), robotBody.getBody(), new Vec2(0.0, 1.0));
-    bodyJoint = (PrismaticJoint)j.getJoint();
+    // MyJoint j = new MyJoint( primaticType, underPan.getBody(), robotBody.getBody(), new Vec2(0.0, 1.0));
+    // bodyJoint = (PrismaticJoint)j.getJoint();
   }
-  
+  // add hand
   void addHand()
   {
     // create hand
-    handL = new MyBox(x - 55, y - 30, bodyHight/2, 10, -40, 1);
-    handR = new MyBox(x + 55, y - 30, bodyHight/2, 10,  40, 1);
+    handL = new MyBox(x - 55, y - 30, bodyHeight/2, 10, -40, 1);
+    handR = new MyBox(x + 55, y - 30, bodyHeight/2, 10,  40, 1);
     
     // create joint hand&body
     // left joint
@@ -77,109 +91,174 @@ class Robot
     j  = new MyJoint(handRType, robotBody.getBody(), handR.getBody(), handR.getBody().getWorldPoint(new Vec2(2, 0)));
     handJointR = (RevoluteJoint) j.getJoint(); //<>//
   }
-  
-  void addWheel()
+  // add leg
+  void addLeg()
   {
-    // create wheel
-    wheelR = new MyCircle(x + panLen/4, y + wheelRadius/2 + 10, wheelRadius, true);
-    wheelL = new MyCircle(x - panLen/4, y + wheelRadius/2 + 10, wheelRadius, true);
+    // create Leg
+    legL = new MyBox(x - legImg.width, y - 25 + bodyHeight, legImg.width, legImg.height, 0, 2);
+    legR = new MyBox(x + legImg.width, y - 25 + bodyHeight, legImg.width, legImg.height, 0, 2);
     
-    // left wheel joint
-    MyJoint j = new MyJoint( wheelType, underPan.getBody(), wheelL.getBody(), new Vec2(0.0, 1.0));
-    wheelJointL = (WheelJoint) j.getJoint();
-    // right  wheel joint
-    j = new MyJoint( wheelType, underPan.getBody(), wheelR.getBody(), new Vec2(0.0, 1.0));
-    wheelJointR = (WheelJoint) j.getJoint();
+    // create joint leg&body
+    // left joint
+    MyJoint j  = new MyJoint(legLType, robotBody.getBody(), legL.getBody(), robotBody.getBody().getWorldPoint(new Vec2(-0.5, 0.5)));
+    legJointL = (RevoluteJoint) j.getJoint();
+    // right joint
+    j  = new MyJoint(legRType, robotBody.getBody(), legR.getBody(), robotBody.getBody().getWorldPoint(new Vec2(0.5, 0.5)));
+    legJointR = (RevoluteJoint) j.getJoint();
   }
+  
+  void addFoot()
+  {
+    // create Leg
+    footL = new MyBox(x - legImg.width, y - 20 + bodyHeight, bodyHeight/2, 10, 0, 2);
+    footR = new MyBox(x + legImg.width, y - 20 + bodyHeight, bodyHeight/2, 10, 0, 2);
+    
+    // create joint foot&body
+    // left joint
+    MyJoint j  = new MyJoint(footLType, legL.getBody(), footL.getBody(), footL.getBody().getWorldPoint(new Vec2(-2, 0)));
+    footJointL = (RevoluteJoint) j.getJoint();
+    // right joint
+    j  = new MyJoint(footRType, legR.getBody(), footR.getBody(), footR.getBody().getWorldPoint(new Vec2(-2, 0)));
+    footJointR = (RevoluteJoint) j.getJoint();
+  }
+  
   // action
+  // hand
+  // wave hand
+  // Right
+  void waveRightHand(float s)
+  {
+    handJointR.setMotorSpeed(s);
+  }
   void waveRightHand(boolean motorOn)
   {
     if(motorOn)
     {
-      if(handJointR.getMotorSpeed() == 2)
-        handJointR.setMotorSpeed(-2);
+      if(handJointR.getMotorSpeed() < 0)
+        waveRightHand(waveSpeed);
       else
-        handJointR.setMotorSpeed(2);
+        waveRightHand(-waveSpeed);
     }
     else
-      handJointR.setMotorSpeed(0);
+      handJointR.setMotorSpeed(waveSpeed);
+  }
+  
+  void waveRightHand(int waveTimes)
+  {
+    Thread waveThr = new WaveHandThread("wave", waveTimes, 1, this);
+    waveThr.start();
+  }
+  // Left
+  void waveLeftHand(float s)
+  {
+    handJointL.setMotorSpeed(s);
   }
   void waveLeftHand(boolean motorOn)
   {
     if(motorOn)
     {
-      if(handJointL.getMotorSpeed() == 2)
-        handJointL.setMotorSpeed(-2);
+      if(handJointL.getMotorSpeed() > 0)
+        waveLeftHand(-waveSpeed);
       else
-        handJointL.setMotorSpeed(2);
+        waveLeftHand(waveSpeed);
     }
     else
       handJointL.setMotorSpeed(0);
   }
+  void waveLeftHand(int waveTimes)
+  {
+    Thread waveThr = new WaveHandThread("wave", waveTimes, 0, this);
+    waveThr.start();
+  }
   
   // foot
-  // set move direction
-  void setMotor(float d)
+  // move step by step
+  void liftLeftFoot(boolean motorOn)
   {
-    //turn left
-    if(d < 0)
+    legJointL.setMaxMotorTorque(5000.0);
+    if(motorOn)
     {
-      if(wheelJointL.isMotorEnabled() == false)
-      {
-        wheelJointL.enableMotor(true);
-      }
-      wheelJointL.setMotorSpeed( -d * PI * speed );
-      wheelJointR.enableMotor(false);
-      wheelJointR.setMotorSpeed(0);
+      if(legJointL.getMotorSpeed() < 0)
+        legJointL.setMotorSpeed(speed);
+      else
+        legJointL.setMotorSpeed(-speed);
     }
-    //turn right
-    else if(d > 0)
+    else
+      legJointL.setMotorSpeed(0);
+  }
+  void liftRightFoot(boolean motorOn)
+  {
+    legJointR.setMaxMotorTorque(5000.0);
+    if(motorOn)
     {
-      if(wheelJointR.isMotorEnabled() == false)
-      {
-        wheelJointR.enableMotor(true);
-      }
-      wheelJointR.setMotorSpeed( -d * PI * speed );
-      wheelJointL.enableMotor(false);
-      wheelJointL.setMotorSpeed(0);
+      if(legJointR.getMotorSpeed() > 0)
+        legJointR.setMotorSpeed(-speed);
+      else
+        legJointR.setMotorSpeed(speed);
     }
-    //stop
+    else
+      legJointR.setMotorSpeed(0);
+  }
+  // move step by step
+  // left
+  void moveL(int step)
+  {
+    // liftLeftFoot(true);
+    Thread moveThr = new MoveThread("move", step, 0, this);
+    moveThr.start();
+  }
+  // right
+  void moveR(int step)
+  {
+    // liftRightFoot(true);
+    Thread moveThr = new MoveThread("move", step, 1, this);
+    moveThr.start();
+  }
+  
+  // kick
+  void kickL()
+  {
+    legJointL.setMaxMotorTorque(50000.0);
+    if(legJointL.getMotorSpeed() > 0)
+      legJointL.setMotorSpeed(-kickSpeed);
     else
     {
-      if(wheelJointR.isMotorEnabled())
-      {
-        wheelJointR.enableMotor(false);
-        wheelJointL.setMotorSpeed(0);
-        wheelJointL.enableMotor(true);
-      }
-      else if(wheelJointL.isMotorEnabled())
-      {
-        wheelJointL.enableMotor(false);
-        wheelJointR.setMotorSpeed(0);
-        wheelJointR.enableMotor(true);
-      }
+      legJointL.setMaxMotorTorque(5000.0);
+      legJointL.setMotorSpeed(kickSpeed);
     }
   }
-  // Turn the motor on or off
-  void toggleMotor() 
+  void kickR()
   {
-    wheelJointL.enableMotor(!wheelJointL.isMotorEnabled());
-    wheelJointR.enableMotor(!wheelJointR.isMotorEnabled());
+    legJointR.setMaxMotorTorque(50000.0);
+    if(legJointR.getMotorSpeed() < 0)
+      legJointR.setMotorSpeed(kickSpeed);
+    else
+    {
+      legJointR.setMaxMotorTorque(5000.0);
+      legJointR.setMotorSpeed(-kickSpeed);
+    }
   }
-  boolean motorOn() 
+  
+  // reset foot to suitable status
+  void resetFoot()
   {
-    return wheelJointL.isMotorEnabled();
+    liftLeftFoot(true);
+    liftRightFoot(true);
+    liftLeftFoot(true);
+    liftRightFoot(true);
   }
-
+  
+  // destroy
   void killBody()
   {
     robotHead.killBody();
     robotBody.killBody();
     handL.killBody();
     handR.killBody();
-    underPan.killBody();
-    wheelL.killBody();
-    wheelR.killBody();
+    legL.killBody();
+    legR.killBody();
+    // footL.killBody();
+    // footR.killBody();
   }
 
   void display() 
@@ -187,12 +266,11 @@ class Robot
     handL.display();
     handR.display();
     
+    legL.display();
+    legR.display();
+    // footL.display();
+    // footR.display();
     robotBody.display();
-    underPan.display();
-    
-    wheelL.display();
-    wheelR.display();
-    
     robotHead.display();
   }
 }
