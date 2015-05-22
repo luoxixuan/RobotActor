@@ -7,14 +7,16 @@
 class MyThread extends Thread
 {
   int times;
+  int sleepT;
   int dir;
   Robot robot;
   
-  MyThread(String name, int s, int d, Robot r)
+  MyThread(String name, int t, int d, int s, Robot r)
   {
     super(name);
-    times   = s;
+    times   = t * 2;
     dir     = d;
+    sleepT  = s;
     robot   = r;
   }
 }

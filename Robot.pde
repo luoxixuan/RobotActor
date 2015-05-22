@@ -14,11 +14,22 @@ class Robot
   float x;
   float y;
   // body size 
-  float bodyHeight  = 70;
-  float speed       = 2.0;
-  float kickSpeed   = 50;
-  float waveSpeed   = 2;
-  float stepT       = 2;
+  float bodyHeight      = 70;
+  
+  // motorTorque
+  float legMotorTorque  = 6000.0;
+  float handMotorTorque = 5000.0;
+  // speed
+  float moveSpeed       = 2.0;
+  float kickSpeed       = 100;
+  float waveSpeed       = 2;
+  
+  int   danceSleepT     = danceSleepTime;
+  int   moveSleepT      = ninjaMoveSleepT;
+  int   waveSleepT      = ninjaWaveSleepT;
+  
+  int   danceTimes      = ninjaDanceTimes;
+  int   waveTimes       = ninjaWaveTimes;
   
   // body
   MyBox robotBody;
@@ -122,13 +133,43 @@ class Robot
     footJointR = (RevoluteJoint) j.getJoint();
   }
   
+  // data reader
+  int getMoveSleepT()
+  {
+    return moveSleepT;
+  }
+  int getWaveSleepT()
+  {
+    return waveSleepT;
+  }
+  int getDanceSleepT()
+  {
+    return danceSleepT;
+  }
+  
   // action
   // hand
-  // wave hand
-  // Right
+  // set joint motor
+  void waveLeftHand(float s)
+  {
+    handJointL.setMotorSpeed(s);
+  }
   void waveRightHand(float s)
   {
     handJointR.setMotorSpeed(s);
+  }
+  // lift up and down hand
+  void waveLeftHand(boolean motorOn)
+  {
+    if(motorOn)
+    {
+      if(handJointL.getMotorSpeed() > 0)
+        waveLeftHand(-waveSpeed);
+      else
+        waveLeftHand(waveSpeed);
+    }
+    else
+      handJointL.setMotorSpeed(0);
   }
   void waveRightHand(boolean motorOn)
   {
@@ -142,102 +183,124 @@ class Robot
     else
       handJointR.setMotorSpeed(waveSpeed);
   }
-  
+  // wave right hand action
+  // wave once
+  void singleWaveRightHand()
+  {
+    Thread singleWaveRThr = new WaveHandAction("singleWaveR", 1, 1, waveSleepT, this);
+    singleWaveRThr.start();
+  }
+  // wave several times
   void waveRightHand(int waveTimes)
   {
-    Thread waveThr = new WaveHandThread("wave", waveTimes, 1, this);
+    Thread waveThr = new WaveHandAction("wave", waveTimes, 1, waveSleepT, this);
     waveThr.start();
   }
   // Left
-  void waveLeftHand(float s)
+  // wave left hand action
+  // wave once 
+  void singleWaveLeftHand()
   {
-    handJointL.setMotorSpeed(s);
+    Thread singleWaveLThr = new WaveHandAction("singleWaveL", 1, 0, waveSleepT, this);
+    singleWaveLThr.start();
   }
-  void waveLeftHand(boolean motorOn)
-  {
-    if(motorOn)
-    {
-      if(handJointL.getMotorSpeed() > 0)
-        waveLeftHand(-waveSpeed);
-      else
-        waveLeftHand(waveSpeed);
-    }
-    else
-      handJointL.setMotorSpeed(0);
-  }
+  // wave several times 
   void waveLeftHand(int waveTimes)
   {
-    Thread waveThr = new WaveHandThread("wave", waveTimes, 0, this);
-    waveThr.start();
+    Thread waveLThr = new WaveHandAction("waveL", waveTimes, 0, waveSleepT, this);
+    waveLThr.start();
   }
   
-  // foot
-  // move step by step
+  // leg
+  // lift up and down leg
   void liftLeftFoot(boolean motorOn)
   {
-    legJointL.setMaxMotorTorque(5000.0);
+    legJointL.setMaxMotorTorque(legMotorTorque);
     if(motorOn)
     {
       if(legJointL.getMotorSpeed() < 0)
-        legJointL.setMotorSpeed(speed);
+        legJointL.setMotorSpeed(moveSpeed);
       else
-        legJointL.setMotorSpeed(-speed);
+        legJointL.setMotorSpeed(-moveSpeed);
     }
     else
       legJointL.setMotorSpeed(0);
   }
   void liftRightFoot(boolean motorOn)
   {
-    legJointR.setMaxMotorTorque(5000.0);
+    legJointR.setMaxMotorTorque(legMotorTorque);
     if(motorOn)
     {
       if(legJointR.getMotorSpeed() > 0)
-        legJointR.setMotorSpeed(-speed);
+        legJointR.setMotorSpeed(-moveSpeed);
       else
-        legJointR.setMotorSpeed(speed);
+        legJointR.setMotorSpeed(moveSpeed);
     }
     else
       legJointR.setMotorSpeed(0);
   }
-  // move step by step
+  // move action
   // left
+  // single move
+  void singleMoveL()
+  {
+    // liftLeftFoot(true);
+    Thread singleMoveLThr = new LiftLegAction("singleMoveL", 1, 0, moveSleepT, this);
+    singleMoveLThr.start();
+  }
+  // move serveral times
   void moveL(int step)
   {
     // liftLeftFoot(true);
-    Thread moveThr = new MoveThread("move", step, 0, this);
-    moveThr.start();
+    Thread moveLThr = new LiftLegAction("moveL", step, 0, moveSleepT, this);
+    moveLThr.start();
   }
   // right
+  // single move 
+  void singleMoveR()
+  {
+    // liftLeftFoot(true);
+    Thread singleMoveRThr = new LiftLegAction("singleMoveR", 1, 1, moveSleepT, this);
+    singleMoveRThr.start();
+  }
+  // move several times
   void moveR(int step)
   {
     // liftRightFoot(true);
-    Thread moveThr = new MoveThread("move", step, 1, this);
-    moveThr.start();
+    Thread moveRThr = new LiftLegAction("moveR", step, 1, moveSleepT, this);
+    moveRThr.start();
+  }
+  
+  // dance action
+  void dance()
+  {
+    // liftRightFoot(true);
+    Thread danceThr = new danceAction("dance", danceSleepT, ninjaStepNum, this);
+    danceThr.start();
   }
   
   // kick
   void kickL()
   {
-    legJointL.setMaxMotorTorque(50000.0);
-    if(legJointL.getMotorSpeed() > 0)
-      legJointL.setMotorSpeed(-kickSpeed);
-    else
-    {
-      legJointL.setMaxMotorTorque(5000.0);
-      legJointL.setMotorSpeed(kickSpeed);
-    }
+    //
   }
+  
   void kickR()
   {
-    legJointR.setMaxMotorTorque(50000.0);
+    //
+  }
+  /*
+  {
+    legJointR.setMaxMotorTorque(5*legMotorTorque);
     if(legJointR.getMotorSpeed() < 0)
       legJointR.setMotorSpeed(kickSpeed);
     else
     {
-      legJointR.setMaxMotorTorque(5000.0);
-      legJointR.setMotorSpeed(-kickSpeed);
+      legJointR.setMaxMotorTorque(legMotorTorque);
+      legJointR.setMotorSpeed(-moveSpeed);
     }
   }
+  */
   
   // reset foot to suitable status
   void resetFoot()

@@ -32,10 +32,15 @@ float gra = -9.80;
 // ninja robot
 Robot ninja;
 Robot ragdoll;
-// steps
-int stepNum   = 20;
-// wave times
-int waveTimes = 10;
+Robot ragdoll1;
+// ninja data
+int ninjaStepNum    = 10;
+int ninjaWaveTimes  = 10;
+int ninjaDanceTimes = 10;
+
+int danceSleepTime  = 200; // ms
+int ninjaWaveSleepT = 1000;
+int ninjaMoveSleepT = 1000;
 
 // lists we'll use to track fixed objects
 ArrayList<Boundary> boundaries;
@@ -88,7 +93,8 @@ void setup()
   
   //creat a robot
   ninja = new Robot(width/2, height - 100);
-  ragdoll = new Robot(width/3, height - 100);
+  ragdoll = new Robot(width/2 - 200, height - 100);
+  ragdoll1 = new Robot(width/2 + 200, height - 100);
 }
 
 void draw()
@@ -129,6 +135,7 @@ void draw()
     image( ninjaImg, 400, 180);
   ninja.display();// Show robotninja
   ragdoll.display();
+  ragdoll1.display();
   // show the boundaries!
   for (Boundary wall: boundaries) 
   {
@@ -164,7 +171,8 @@ void mouseMoved()
 
 void keyPressed()
 {
-  // wave hand
+  // wave hand 
+  // once
   if (keyCode == LEFT) 
   {
     ninja.waveLeftHand(true);
@@ -173,74 +181,77 @@ void keyPressed()
   {
     ninja.waveRightHand(true);
   }
+  // several times
+  if (keyCode == UP)
+  {
+    ninja.waveLeftHand(ninjaWaveTimes);
+  }
   if (keyCode == DOWN)
   {
-    ninja.waveRightHand(waveTimes);
-    ninja.waveLeftHand(waveTimes);
-  }
-  if (keyCode == SHIFT)
-  {
-    ninja.waveLeftHand(-20.0);
-    ninja.waveRightHand(20.0);
-  }
-  // kick
-  if (keyCode == 'K' || keyCode == 'k')
-  {
-    ninja.kickR();
+    ninja.waveRightHand(ninjaWaveTimes);
   }
   
   // move
   if (key == 'A' || key == 'a') 
   {
-    ninja.moveL(stepNum);
+    ninja.singleMoveL();
   }
   if (key == 'D' || key == 'd') 
   {
-    ninja.moveR(stepNum);
+    ninja.singleMoveR();
+  }
+  // single step move
+  if (key == 'W' || key == 'w')
+  {
+    ninja.moveL(ninjaStepNum);
   }
   if (key == 'S' || key == 's')
   {
-    // ninja.liftLeftFoot(false);
-    // ninja.liftRightFoot(false);
+    ninja.moveR(ninjaStepNum);
   }
+  
+  // dance 
+  if (keyCode == 'X' || keyCode == 'x')
+  {
+    ninja.dance();
+    ragdoll.dance();
+    ragdoll1.dance();
+  }
+  
+  // kick
+  if (keyCode == 'J' || keyCode == 'j')
+  {
+    ninja.kickL();
+  }
+  if (keyCode == 'L' || keyCode == 'l')
+  {
+    ninja.kickR();
+  }
+  
+  
+  // reset all
   if (key == 'R' || key == 'r')
   {
     setup();
   }
 }
-/*
+
+// word controller
 void wordCommand()
 {
   if(displayMsg.indexOf("le")>=0 || displayMsg.indexOf("ft")>=0)
   {
-    println("left");
-    displayMsg = "left";
-    if(!ninja.motorOn())
-    {
-      ninja.toggleMotor();
-    }
-    ninja.setMotor(-1.0);
+    displayMsg = "move left";
   }
   else if(displayMsg.indexOf("gh")>=0 || displayMsg.indexOf("ri")>=0)
   {
-    println("right");
-    displayMsg = "right";
-    if(!ninja.motorOn())
-    {
-      ninja.toggleMotor();
-    }
-    ninja.setMotor(1.0);
+    displayMsg = "move right";
   }
-  
- else if(displayMsg.indexOf("st")>=0)
- {
-   println("stop");
-   displayMsg = "stop";
-   
-   ninja.setMotor(0.0);
- }
+  else if(displayMsg.indexOf("st")>=0)
+  {
+    displayMsg = "stop";
+  }
 }
-*/
 //websocket
 void websocketOnMessage(WebSocketConnection con, String msg)
 {
@@ -248,7 +259,7 @@ void websocketOnMessage(WebSocketConnection con, String msg)
   displayMsg = msg;
   
   //commander
-  // wordCommand();
+  wordCommand();
 }
 
 void websocketOnOpen(WebSocketConnection con)

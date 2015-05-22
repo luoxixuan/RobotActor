@@ -31,12 +31,12 @@ class MyBox
     body = box2d.createBody(bd);
 
     // Define a fixture
-    FixtureDef fd = new FixtureDef();
-    fd.shape = sd;
+    FixtureDef fd  = new FixtureDef();
+    fd.shape       = sd;
     // Parameters that affect physics
-    fd.density = 3;
-    fd.friction = 0.01;
-    fd.restitution = 0.7;
+    fd.density     = 4;
+    fd.friction    = 0.2;
+    fd.restitution = 0.3;
 
     body.createFixture(fd);
   }
@@ -91,8 +91,8 @@ class MyBox
         case 3://underpan
           fill(#ede8d9);
           noStroke();
-           //<>//
-          break;
+          
+          break; //<>//
           
         case 4://else
           fill(#ede8d9);
@@ -101,7 +101,8 @@ class MyBox
           break;
       }
       // draw shape
-      fill(#ede8d9);
+      // fill(#ede8d9); // white
+      fill(#96a194);
       if(debug)
         rect(0.0, 0.0, w, h, w/7);
     popMatrix();
