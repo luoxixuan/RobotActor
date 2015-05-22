@@ -275,7 +275,7 @@ class Robot
   void dance()
   {
     // liftRightFoot(true);
-    Thread danceThr = new danceAction("dance", danceSleepT, ninjaStepNum, this);
+    Thread danceThr = new DanceAction("dance", danceSleepT, ninjaStepNum, this);
     danceThr.start();
   }
   

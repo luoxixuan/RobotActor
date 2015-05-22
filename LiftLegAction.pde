@@ -4,9 +4,9 @@
  * d   :  0->left, 1->right;
  * r   :  the robot we contolled;
  */
-class MoveThread extends MyThread
+class LiftLegAction extends MyThread
 {
-  MoveThread(String name, int t, int d, int s, Robot r)
+  LiftLegAction(String name, int t, int d, int s, Robot r)
   {
     super(name, t, d, s, r);
   }
