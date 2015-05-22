@@ -1,15 +1,15 @@
-class Circle
+class MyCircle
 {
   // We need to keep track of a Body and a width and height
   Body body;
   float radius;
-  boolean isWheel;
+  int type;
 
   // Constructor
-  Circle(float x, float y, float r, boolean b) 
+  MyCircle(float x, float y, float r, int t) 
   {
     radius = r;
-    isWheel = b;
+    type = t;
     // Define the shape
     CircleShape circleShape = new CircleShape();
     circleShape.m_radius = radius/15;
@@ -40,6 +40,11 @@ class Circle
   {
     box2d.destroyBody(body);
   }
+  
+  Body getBody()
+  {
+    return body;
+  }
 
   // Drawing the box
   void display() 
@@ -53,22 +58,39 @@ class Circle
     pushMatrix();
       translate(pos.x,pos.y);
       rotate(-a);
-      fill(#F3C149);
-      noStroke();
-      // stroke(#eac774);
-      ellipse(0,0, radius, radius);
-      if(isWheel)
+      
+      switch(type)
       {
+      case 0:
+        // draw wheel
+        fill(#F3C149);
+        noStroke();
+        // stroke(#eac774);
+        if(debug)
+          ellipse(0,0, radius, radius);//draw circle
+        // draw wheel shaft
         noStroke();
         fill(0);
-        rect(0.0, 0.0, radius/20, radius - 2);
-      }
-      else if(!isWheel)
-      {
+        if(debug)
+          rect(0.0, 0.0, radius/20, radius - 2);
+        break;
+        
+      case 1:
         noStroke();
         fill(#fff8b5);
-        ellipse(   radius/6.0, 0.0, radius/15.0, radius/6.0);
-        ellipse( - radius/6.0, 0.0, radius/15.0, radius/6.0);
+        if(debug)
+        {
+          ellipse(   radius/6.0, 0.0, radius/15.0, radius/6.0);
+          ellipse( - radius/6.0, 0.0, radius/15.0, radius/6.0);
+        }
+        image( head, -head.width/2.0, -head.height/2.0);
+        break;
+        
+      case 2:
+        fill(#F3C149);
+        noStroke();
+        ellipse(0,0, radius, radius);//draw circle
+        break;
       }
     popMatrix();
   }

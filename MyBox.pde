@@ -1,4 +1,6 @@
-class Box
+enum displayMode{hand, leg, underpan, boxes}
+
+class MyBox
 {
   // We need to keep track of a Body and a width and height
   Body body;
@@ -6,20 +8,19 @@ class Box
   float w;
   float h;
   float radius;
-  boolean isBody;
 
   // Constructor
-  Box(float x, float y, float w_, float h_, float angle, boolean b) 
+  MyBox(float x, float y, float w_, float h_, float angle, int t) 
   {
     w = w_;
     h = h_;
-    isBody = b;
+    type = t;
      // Define the shape -- a  (this is what we use for a rectangle)
     PolygonShape sd = new PolygonShape();
     float box2dW = box2d.scalarPixelsToWorld(w/2);
     float box2dH = box2d.scalarPixelsToWorld(h/2);
     sd.setAsBox(box2dW, box2dH);
-    sd.m_radius = 0.1;
+    sd.m_radius = 0.001;
     
     // Define and create the body
     BodyDef bd = new BodyDef();
@@ -38,16 +39,17 @@ class Box
     fd.restitution = 0.7;
 
     body.createFixture(fd);
-
-    // Give it some initial random velocity
-    //body.setLinearVelocity(new Vec2(random(-5,5),random(2,5)));
-    //body.setAngularVelocity(random(-5,5));
   }
 
   // This function removes the particle from the box2d world
   void killBody() 
   {
     box2d.destroyBody(body);
+  }
+  
+  Body getBody()
+  {
+    return body;
   }
 
   // Drawing the box
@@ -62,17 +64,46 @@ class Box
     pushMatrix();
       translate(pos.x,pos.y);
       rotate(-a);
-      fill(#ede8d9);
-      noStroke();
-      // stroke(#ecdaa2);
-      rect(0,0,w,h);
-      if(isBody)
+      
+      switch(type)
       {
-        fill(255);
-        noStroke();
-        // stroke(#ecdaa2);
-        rect(0, h/4, 6, h/2);
+        case 0://body
+          if(!debug)
+            image(ninjaBody, -ninjaBody.width/2.0, -ninjaBody.height/2.0);
+          break;
+          
+        case 1://Hand
+          if(!debug)
+          {
+            image(handImg, -handImg.width/2.0 - 12, -handImg.height/2.0);
+            image(handImg,  handImg.width/2.0 - 12, -handImg.height/2.0);
+          }
+          break;
+          
+        case 2://Leg
+          if(!debug)
+          {
+            image(legImg, -legImg.width/2.0, 8.0 -legImg.height * 2);
+            image(legImg, -legImg.width/2.0, 8.0 -legImg.height);
+          }
+          break;
+          
+        case 3://underpan
+          fill(#ede8d9);
+          noStroke();
+           //<>//
+          break;
+          
+        case 4://else
+          fill(#ede8d9);
+          noStroke();
+          rect(0 ,0 ,w , h, w/7);
+          break;
       }
+      // draw shape
+      fill(#ede8d9);
+      if(debug)
+        rect(0.0, 0.0, w, h, w/7);
     popMatrix();
   }
 }

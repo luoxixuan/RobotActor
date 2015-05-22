@@ -9,38 +9,75 @@ import org.jbox2d.dynamics.contacts.*;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.lang.Thread;
+import java.lang.Runnable;
 
 import muthesius.net.*;
 import org.webbitserver.*;
 
+// debug
+boolean debug = true;
+
+// enum
+enum MoveDir{left, right};
+
+// websocket
 WebSocketP5 socket;
 String displayMsg;
 
+// box2d
 Box2DProcessing box2d;
 float gra = -9.80;
 
-Robot robotActor;
-// A list we'll use to track fixed objects
-ArrayList<Boundary> boundaries;
-ArrayList<Box> boxes;
+// ninja robot
+Robot ninja;
+Robot ragdoll;
+// steps
+int stepNum   = 20;
+// wave times
+int waveTimes = 10;
 
+// lists we'll use to track fixed objects
+ArrayList<Boundary> boundaries;
+ArrayList<MyBox> boxes;
+ArrayList<MyCircle> balls;
+
+// image res
+PImage ninjaImg;
+PImage head,ninjaBody,handImg,rightHand,legImg,rightLeg;
 void setup()
 {
-  size(1200, 400);
+  size(1200, 700);
   smooth();
   background(255);
-  //socket init
+  
+  // image resource
+  // load image
+  ninjaImg  = loadImage("res/ninja.png");
+  head      = loadImage("res/ninjaHead.png");
+  ninjaBody = loadImage("res/ninjaBody.png");
+  handImg   = loadImage("res/ninjaHandS.png");
+  legImg    = loadImage("res/ninjaLegS.png");
+  // resize image
+  head.resize((int)(head.width/3.2), (int)(head.height/3.2));
+  legImg.resize((int)(legImg.width/3), (int)(legImg.height/4));
+  handImg.resize((int)(handImg.width/2.5), (int)(handImg.height/2.6));
+  ninjaBody.resize((int)(ninjaBody.width/3.4), (int)(ninjaBody.height/3));
+  
+  // socket init
   displayMsg = "";
   socket = new WebSocketP5(this,8080);
   
+  // box2d world init
   Vec2 gravity = new Vec2();
   gravity.set( 0, gra);
-  
   box2d = new Box2DProcessing(this);
   box2d.createWorld(gravity);
   
-  // init boxes
-  boxes = new ArrayList<Box>();
+  // boxes array init //<>//
+  boxes = new ArrayList<MyBox>();
+  balls = new ArrayList<MyCircle>();
+  
   // Add some boundaries
   boundaries = new ArrayList<Boundary>();
   //Boundary(x,y,width,height)
@@ -48,47 +85,71 @@ void setup()
   boundaries.add(new Boundary( width/2,           0, width,       0));
   boundaries.add(new Boundary(   width, height   /2,     0,  height));
   boundaries.add(new Boundary(       0, height   /2,     0,  height));
+  
   //creat a robot
-  robotActor = new Robot(width/2, height - 60);
+  ninja = new Robot(width/2, height - 100);
+  ragdoll = new Robot(width/3, height - 100);
 }
 
 void draw()
 {
   background(255);
   
+  // box2d world update
   box2d.step();
-  //text message 
+  
+  // text message 
+  // guide info
   fill( 0, 200, 0);
   textSize(10);
   text("Press 'a' or 'd' 's' control the robot's motor", 20, 20);
   text("Or you can speak 'left' or 'right' and 'stop' to control the robot", 20, 40);
-  
+  // show command
   fill(0);
   textSize(20);
   text("Your Command:", 20, 70);
   textSize(20);
   text(displayMsg, 100, 90);
   
-  if (mousePressed) {
-    Box p = new Box(mouseX,mouseY, random(20), random(20), random(PI), false);
+  // press the mouse button then add boxes
+  if (mousePressed && (mouseButton == RIGHT)) 
+  {
+    MyBox p = new MyBox(mouseX,mouseY, random(20), random(20), random(PI), 4);
     boxes.add(p);
   }
+  else if (mousePressed && (mouseButton == LEFT)) 
+  {
+    MyCircle p = new MyCircle(mouseX, mouseY, 10, 2);
+    balls.add(p);
+  }
   
-  robotActor.display();
-  // Show the boundaries!
+  // show the ninja
+  noStroke();
+  if(debug)
+    image( ninjaImg, 400, 180);
+  ninja.display();// Show robotninja
+  ragdoll.display();
+  // show the boundaries!
   for (Boundary wall: boundaries) 
   {
     wall.display();
   }
+  // show boxes
   if(boxes.size() != 0)
   {
-   for (Box box: boxes)
+   for (MyBox box: boxes)
    {
      box.display();
    }
   }
-  SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-  //println(df.format(new Date()));
+  // show balls
+  if(balls.size() != 0)
+  {
+    for (MyCircle ball: balls)
+    {
+      ball.display();
+    }
+  }
 }
 
 void stop()
@@ -96,52 +157,79 @@ void stop()
   socket.stop();
 }
 
-void mousePressed()
+void mouseMoved()
 {
-  
+  // drag ninja hand
 }
 
 void keyPressed()
 {
+  // wave hand
+  if (keyCode == LEFT) 
+  {
+    ninja.waveLeftHand(true);
+  }
+  if (keyCode == RIGHT)
+  {
+    ninja.waveRightHand(true);
+  }
+  if (keyCode == DOWN)
+  {
+    ninja.waveRightHand(waveTimes);
+    ninja.waveLeftHand(waveTimes);
+  }
+  if (keyCode == SHIFT)
+  {
+    ninja.waveLeftHand(-20.0);
+    ninja.waveRightHand(20.0);
+  }
+  // kick
+  if (keyCode == 'K' || keyCode == 'k')
+  {
+    ninja.kickR();
+  }
+  
+  // move
   if (key == 'A' || key == 'a') 
   {
-    robotActor.setMotor(-1.0);
+    ninja.moveL(stepNum);
   }
   if (key == 'D' || key == 'd') 
   {
-    robotActor.setMotor(1.0);
+    ninja.moveR(stepNum);
   }
   if (key == 'S' || key == 's')
   {
-    robotActor.setMotor(0.0);
+    // ninja.liftLeftFoot(false);
+    // ninja.liftRightFoot(false);
   }
   if (key == 'R' || key == 'r')
   {
     setup();
   }
 }
-
+/*
 void wordCommand()
 {
   if(displayMsg.indexOf("le")>=0 || displayMsg.indexOf("ft")>=0)
   {
     println("left");
     displayMsg = "left";
-    if(!robotActor.motorOn())
+    if(!ninja.motorOn())
     {
-      robotActor.toggleMotor();
+      ninja.toggleMotor();
     }
-    robotActor.setMotor(-1.0);
+    ninja.setMotor(-1.0);
   }
   else if(displayMsg.indexOf("gh")>=0 || displayMsg.indexOf("ri")>=0)
   {
     println("right");
     displayMsg = "right";
-    if(!robotActor.motorOn())
+    if(!ninja.motorOn())
     {
-      robotActor.toggleMotor();
+      ninja.toggleMotor();
     }
-    robotActor.setMotor(1.0);
+    ninja.setMotor(1.0);
   }
   
  else if(displayMsg.indexOf("st")>=0)
@@ -149,10 +237,10 @@ void wordCommand()
    println("stop");
    displayMsg = "stop";
    
-   robotActor.setMotor(0.0);
+   ninja.setMotor(0.0);
  }
 }
-
+*/
 //websocket
 void websocketOnMessage(WebSocketConnection con, String msg)
 {
@@ -160,8 +248,7 @@ void websocketOnMessage(WebSocketConnection con, String msg)
   displayMsg = msg;
   
   //commander
-  wordCommand();
-  // println("1");
+  // wordCommand();
 }
 
 void websocketOnOpen(WebSocketConnection con)
@@ -173,4 +260,3 @@ void websocketOnClosed(WebSocketConnection con)
 {
   println("A client left");
 }
-
