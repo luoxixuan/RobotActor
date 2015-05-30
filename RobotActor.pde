@@ -202,20 +202,20 @@ void keyPressed()
     // move
     if (key == 'A' || key == 'a') 
     {
-      ninja.singleMoveL();
+      ninja.singleLiftL();
     }
     if (key == 'D' || key == 'd') 
     {
-      ninja.singleMoveR();
+      ninja.singleLiftR();
     }
     // single step move
     if (key == 'W' || key == 'w')
     {
-      ninja.moveL(ninjaStepNum);
+      ninja.liftL(ninjaStepNum);
     }
     if (key == 'S' || key == 's')
     {
-      ninja.moveR(ninjaStepNum);
+      ninja.liftR(ninjaStepNum);
     }
     
     // dance 

@@ -33,7 +33,7 @@ class DanceAction extends Thread
   {
     print("dance start\n");
     // left leg
-    robot.moveL(kickFootTimes);
+    robot.liftL(kickFootTimes);
     
     // sleep
     try 
@@ -45,7 +45,7 @@ class DanceAction extends Thread
       }
       
     // right leg
-    robot.moveR(kickFootTimes);
+    robot.liftR(kickFootTimes);
   }
   
   void handAction()
