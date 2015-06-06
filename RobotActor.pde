@@ -212,10 +212,12 @@ void keyPressed()
     if (key == 'W' || key == 'w')
     {
       ninja.liftL(ninjaStepNum);
+    ninja.waveLeftHand(true);
     }
     if (key == 'S' || key == 's')
     {
       ninja.liftR(ninjaStepNum);
+    ninja.waveRightHand(true);
     }
     
     // dance 
@@ -261,22 +263,36 @@ void keyPressed()
 // word controller
 void wordCommand()
 {
-  if(displayMsg.indexOf("le")>=0 || displayMsg.indexOf("ft")>=0)
+  if(displayMsg.indexOf("向左走")>=0 || displayMsg.indexOf("左")>=0)
   {
-    displayMsg = "move left";
+    displayMsg = "向左走";
+    ninja.waveLeftHand(true);
+    ninja.liftL(ninjaStepNum);
   }
-  else if(displayMsg.indexOf("gh")>=0 || displayMsg.indexOf("ri")>=0)
+  else if(displayMsg.indexOf("向右走")>=0 || displayMsg.indexOf("右")>=0)
   {
-    displayMsg = "move right";
+    displayMsg = "向右走";
+    ninja.waveRightHand(true);
+    ninja.liftR(ninjaStepNum);
   }
-  else if(displayMsg.indexOf("st")>=0)
+  else if(displayMsg.indexOf("手舞足蹈")>=0 || displayMsg.indexOf("舞")>=0 )
   {
-    displayMsg = "stop";
+    displayMsg = "手舞足蹈";
+    ninja.dance();
+    if(ragdoll != null)
+      ragdoll.dance();
+    if(ragdoll1 != null)
+      ragdoll1.dance();
+  }
+  else if(displayMsg.indexOf("挥手告别")>=0)
+  {
+    displayMsg = "挥手告别";
   }
 }
 //websocket
 void websocketOnMessage(WebSocketConnection con, String msg)
 {
+  println("msgget");
   println(msg);
   displayMsg = msg;
   
