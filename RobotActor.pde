@@ -212,12 +212,12 @@ void keyPressed()
     if (key == 'W' || key == 'w')
     {
       ninja.liftL(ninjaStepNum);
-    ninja.waveLeftHand(true);
+      ninja.waveLeftHand(true);
     }
     if (key == 'S' || key == 's')
     {
       ninja.liftR(ninjaStepNum);
-    ninja.waveRightHand(true);
+      ninja.waveRightHand(true);
     }
     
     // dance 
